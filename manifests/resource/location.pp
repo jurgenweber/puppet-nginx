@@ -131,22 +131,26 @@ define nginx::resource::location(
 
 
   ## Create stubs for vHost File Fragment Pattern
-  if $bool_ssl_only != true {
-    concat::fragment { "${vhost}+50-${location}.tmp":
-      ensure  => $ensure_real,
-      order   => '50',
-      content => $content_real,
-      target  => $file_real,
+  if ($bool_ssl_only != true) {
+    if ($ensure_real != absent) {
+      concat::fragment { "${vhost}+50-${location}.tmp":
+        ensure  => $ensure_real,
+        order   => '50',
+        content => $content_real,
+        target  => $file_real,
+      }
     }
   }
 
   if ($mixin_ssl) {
     ## Only create SSL Specific locations if $ssl is true.
-    concat::fragment { "${vhost}+80-ssl-${location}.tmp":
-      ensure  => $ssl,
-      order   => '80',
-      content => $content_ssl_real,
-      target  => $file_real,
+    if ($ssl != absent) {
+      concat::fragment { "${vhost}+80-ssl-${location}.tmp":
+        ensure  => $ssl,
+        order   => '80',
+        content => $content_ssl_real,
+        target  => $file_real,
+      }
     }
   }
 }
